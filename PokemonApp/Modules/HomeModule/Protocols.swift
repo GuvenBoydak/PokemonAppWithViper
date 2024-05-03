@@ -16,7 +16,7 @@ protocol HomeViewProtocol {
 }
 
 protocol HomeViewOutput {
-    func showPokemons(pokemonResult: PokemonResult)
+    func showPokemons(pokemonResult: PokemonResult,isAdditional: Bool)
 }
 
 // MARK: - Presenter
@@ -24,8 +24,11 @@ protocol HomePresenterProtocol {
     var view: HomeViewProtocol? { get set }
     var viewOutput: HomeViewOutput? { get set }
     var interactor: HomeInteractorProtocol? { get set }
+    var shouldShowLoadMoreIndicator: Bool { get set }
+    var isLoadingMorePokemon: Bool { get set }
     
     func fetchPokemons() 
+    func fetchAdditionalPokemons(url: String)
 }
 
 // MARK: - Interactor
@@ -34,10 +37,12 @@ protocol HomeInteractorProtocol {
     var networkService: NetworkServiceProtocol { get set}
     
     func fetchPokemons()
+    func fetchAdditionalPokemons(url: String)
 }
 
 protocol HomeInteractorOutput {
-    func fetchPokemonsOutput(pokemonResult: PokemonResult)
+    func fetchPokemonsOutput(pokemonResult: PokemonResult,isAdditional: Bool)
+    func setIsLoadingMorePokemon(value: Bool)
 }
 
 // MARK: - Router

@@ -14,7 +14,8 @@ final class HomeViewController: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView.register(HomeCollectionViewCell.self, forCellWithReuseIdentifier: HomeCollectionViewCell.identifier)
+        collectionView.backgroundColor = .tertiarySystemBackground
         return collectionView
     }()
     private var indicatorView: UIActivityIndicatorView = {
@@ -24,13 +25,12 @@ final class HomeViewController: UIViewController {
     }()
     
     // MARK: - Properties
-    var pokemons: [String] = []
+    var pokemonResult: PokemonResult?
     var presenter: HomePresenterProtocol?
     
     // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
         setup()
         presenter?.fetchPokemons()
     }
@@ -40,6 +40,8 @@ final class HomeViewController: UIViewController {
 extension HomeViewController {
     private func setup() {
         addConstraint()
+        view.backgroundColor = .systemBackground
+        title = "Pokemons"
     }
     private func addConstraint() {
         view.addSubview(collectionView)
@@ -68,13 +70,24 @@ extension HomeViewController: HomeViewProtocol {
     }
     
     func closeIndicator() {
-        indicatorView.stopAnimating()
+        DispatchQueue.main.async {
+            self.indicatorView.stopAnimating()
+        }
     }
 }
 // MARK: - HomeViewOutput
 extension HomeViewController: HomeViewOutput {
-    func showPokemons(pokemons: [String]) {
-        self.pokemons = pokemons
+    func showPokemons(pokemonResult: PokemonResult,isAdditional: Bool) {
+        if !isAdditional {
+            self.pokemonResult = pokemonResult
+        }
+                
+        var results = self.pokemonResult?.results
+        results?.append(contentsOf: pokemonResult.results)
+        let newPokeResult = PokemonResult(count: pokemonResult.count, next: pokemonResult.next, results: results ?? [] )
+        self.pokemonResult = newPokeResult
+        
+
         DispatchQueue.main.async {
             self.collectionView.reloadData()
         }
@@ -84,11 +97,16 @@ extension HomeViewController: HomeViewOutput {
 // MARK: - UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout
 extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        pokemons.count
+        pokemonResult?.results.count ?? 0
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
-        cell.backgroundColor = .red
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeCollectionViewCell.identifier, for: indexPath) as! HomeCollectionViewCell
+        if let info = pokemonResult?.results[indexPath.row] {
+            cell.configure(info: info)
+        }
+        cell.layer.borderWidth = 1
+        cell.layer.borderColor = UIColor.tertiarySystemFill.cgColor
+        cell.layer.cornerRadius = 10
         return cell
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -97,5 +115,34 @@ extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSourc
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         .init(top: 5, left: 5, bottom: 5, right: 5)
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+        guard presenter?.shouldShowLoadMoreIndicator ?? false else {
+            return .zero
+        }
+        return .init(width: collectionView.frame.width, height: 100)
+    }}
+
+// MARK: - UIScrollViewDelegate
+extension HomeViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        guard let shouldShowLoadMoreIndicator = presenter?.shouldShowLoadMoreIndicator,
+              shouldShowLoadMoreIndicator,
+              let isLoading = presenter?.isLoadingMorePokemon,
+              !isLoading else {
+            return
+        }
+
+        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] timer in
+            let offset = scrollView.contentOffset.y
+            let totalContentHeight = scrollView.contentSize.height
+            let totalScrollViewFixedHeight = scrollView.frame.size.height
+            
+            if offset >= (totalContentHeight - totalScrollViewFixedHeight - 120) {
+                self?.presenter?.fetchAdditionalPokemons(url: self?.pokemonResult?.next ?? "")
+            }
+            timer.invalidate()
+        }
     }
 }

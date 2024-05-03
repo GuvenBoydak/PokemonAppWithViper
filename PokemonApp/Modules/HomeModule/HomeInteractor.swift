@@ -9,6 +9,7 @@ import Foundation
 
 
 final class HomeInteractor: HomeInteractorProtocol {
+    
     var presenter: HomeInteractorOutput?
     var networkService: NetworkServiceProtocol
     
@@ -30,9 +31,9 @@ final class HomeInteractor: HomeInteractorProtocol {
                             }
                         }
                         let pokemonResult = PokemonResult(count: datas.count, next: datas.next, results: infos)
-                        presenter?.fetchPokemonsOutput(pokemonResult: pokemonResult)
+                        presenter?.fetchPokemonsOutput(pokemonResult: pokemonResult,isAdditional: false)
                     }
-                case .failure(let failure):
+                case .failure(_):
                     break
                 }
             } catch {
@@ -48,12 +49,37 @@ final class HomeInteractor: HomeInteractorProtocol {
             case .success(let poke):
                 return Info(name: poke?.name ?? "",
                                 url: poke?.sprites.other?.officialArtwork.frontDefault ?? "")
-            case .failure(let failure):
+            case .failure(_):
                 break
             }
         } catch  {
         }
         return nil
+    }
+    
+    func fetchAdditionalPokemons(url: String) {
+        Task {
+            var infos: [Info] = []
+            do {
+                let result = try await networkService.fetchData(url: url, type: PokemonResult.self)
+                switch result {
+                case .success(let datas):
+                    if let datas {
+                        for data in datas.results {
+                            if let info = await fetchPokemon(url: data.url) {
+                                infos.append(info)
+                            }
+                        }
+                        let pokemonResult = PokemonResult(count: datas.count, next: datas.next, results: infos)
+                        presenter?.fetchPokemonsOutput(pokemonResult: pokemonResult,isAdditional: true)
+                        presenter?.setIsLoadingMorePokemon(value: false)
+                    }
+                case .failure(_):
+                    break
+                }
+            } catch {
+            }
+        }
     }
 }
 

@@ -11,18 +11,34 @@ final class HomePresenter: HomePresenterProtocol {
     var view: HomeViewProtocol?
     var viewOutput: HomeViewOutput?
     var interactor: HomeInteractorProtocol?
+    var shouldShowLoadMoreIndicator: Bool = false
+    var isLoadingMorePokemon: Bool = false
     
     func fetchPokemons() {
          interactor?.fetchPokemons()
     }
+    
+    func fetchAdditionalPokemons(url: String) {
+        guard !isLoadingMorePokemon else { return }
+        isLoadingMorePokemon = true
+        
+        interactor?.fetchAdditionalPokemons(url: url)
+
+    }
 }
 // MARK: - HomeInteractorOutput
-extension HomePresenter: HomeInteractorOutput {
-    func fetchPokemonsOutput(pokemonResult: PokemonResult) {
+extension HomePresenter: HomeInteractorOutput {   
+    func setIsLoadingMorePokemon(value: Bool) {
+        isLoadingMorePokemon = value
+    }
+    
+    func fetchPokemonsOutput(pokemonResult: PokemonResult,isAdditional: Bool) {
         if pokemonResult.results.isEmpty {
             view?.showIndicator()
         }
-        view?.closeIndicator()
-        viewOutput?.showPokemons(pokemonResult: pokemonResult)
+        shouldShowLoadMoreIndicator = pokemonResult.next != ""
+        view?.closeIndicator()      
+        
+        viewOutput?.showPokemons(pokemonResult: pokemonResult,isAdditional: isAdditional)
     }
 }

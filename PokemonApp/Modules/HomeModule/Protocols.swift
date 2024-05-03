@@ -16,7 +16,7 @@ protocol HomeViewProtocol {
 }
 
 protocol HomeViewOutput {
-    func showPokemons(pokemons: [String])
+    func showPokemons(pokemonResult: PokemonResult)
 }
 
 // MARK: - Presenter
@@ -25,18 +25,19 @@ protocol HomePresenterProtocol {
     var viewOutput: HomeViewOutput? { get set }
     var interactor: HomeInteractorProtocol? { get set }
     
-    func fetchPokemons()
+    func fetchPokemons() 
 }
 
 // MARK: - Interactor
 protocol HomeInteractorProtocol {
     var presenter: HomeInteractorOutput? { get set }
+    var networkService: NetworkServiceProtocol { get set}
     
     func fetchPokemons()
 }
 
 protocol HomeInteractorOutput {
-    func fetchPokemonsOutput(pokemons: [String])
+    func fetchPokemonsOutput(pokemonResult: PokemonResult)
 }
 
 // MARK: - Router

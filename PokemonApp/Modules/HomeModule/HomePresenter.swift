@@ -13,16 +13,16 @@ final class HomePresenter: HomePresenterProtocol {
     var interactor: HomeInteractorProtocol?
     
     func fetchPokemons() {
-        interactor?.fetchPokemons()
+         interactor?.fetchPokemons()
     }
 }
 // MARK: - HomeInteractorOutput
 extension HomePresenter: HomeInteractorOutput {
-    func fetchPokemonsOutput(pokemons: [String]) {
-        if pokemons.isEmpty {
+    func fetchPokemonsOutput(pokemonResult: PokemonResult) {
+        if pokemonResult.results.isEmpty {
             view?.showIndicator()
         }
         view?.closeIndicator()
-        viewOutput?.showPokemons(pokemons: pokemons)
+        viewOutput?.showPokemons(pokemonResult: pokemonResult)
     }
 }

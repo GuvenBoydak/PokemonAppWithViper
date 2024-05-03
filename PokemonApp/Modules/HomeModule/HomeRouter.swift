@@ -13,7 +13,7 @@ final class HomeRouter: HomeRouterProtocol {
    static func build() -> HomeViewController {
         let view = HomeViewController()
         let presenter = HomePresenter()
-        let interactor = HomeInteractor()
+        let interactor = HomeInteractor(networkService: NetworkService.shared)
        
        view.presenter = presenter
        view.presenter?.view = view

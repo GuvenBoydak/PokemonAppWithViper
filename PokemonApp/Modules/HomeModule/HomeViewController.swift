@@ -62,6 +62,11 @@ extension HomeViewController {
             make.height.equalTo(100)
         }
     }
+    private func reloadCollectıonView() {
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
+    }
 }
 // MARK: - HomeViewInput
 extension HomeViewController: HomeViewProtocol {
@@ -80,17 +85,14 @@ extension HomeViewController: HomeViewOutput {
     func showPokemons(pokemonResult: PokemonResult,isAdditional: Bool) {
         if !isAdditional {
             self.pokemonResult = pokemonResult
+        } else {
+            var results = self.pokemonResult?.results
+            results?.append(contentsOf: pokemonResult.results)
+            let newPokeResult = PokemonResult(count: pokemonResult.count, next: pokemonResult.next, results: results ?? [] )
+            self.pokemonResult = newPokeResult
         }
-                
-        var results = self.pokemonResult?.results
-        results?.append(contentsOf: pokemonResult.results)
-        let newPokeResult = PokemonResult(count: pokemonResult.count, next: pokemonResult.next, results: results ?? [] )
-        self.pokemonResult = newPokeResult
         
-
-        DispatchQueue.main.async {
-            self.collectionView.reloadData()
-        }
+        reloadCollectıonView()
     }
 }
 

@@ -26,7 +26,7 @@ final class HomeInteractor: HomeInteractorProtocol {
                 case .success(let datas):
                     if let datas {
                         for data in datas.results {
-                            if let info = await fetchPokemon(url: data.url) {
+                            if let info = await fetchPokemon(info: data) {
                                 infos.append(info)
                             }
                         }
@@ -42,13 +42,14 @@ final class HomeInteractor: HomeInteractorProtocol {
         }
     }
     
-    private func fetchPokemon(url: String) async -> Info? {
+    private func fetchPokemon(info: Info) async -> Info? {
         do {
-            let pokemon = try await networkService.fetchData(url: url, type: Pokemon.self)
+            let pokemon = try await networkService.fetchData(url: info.url, type: Pokemon.self)
             switch pokemon {
             case .success(let poke):
                 return Info(name: poke?.name ?? "",
-                                url: poke?.sprites.other?.officialArtwork.frontDefault ?? "")
+                             url: info.url,
+                            imageUrl: poke?.sprites.other?.officialArtwork.frontDefault ?? "")
             case .failure(_):
                 break
             }
@@ -66,7 +67,7 @@ final class HomeInteractor: HomeInteractorProtocol {
                 case .success(let datas):
                     if let datas {
                         for data in datas.results {
-                            if let info = await fetchPokemon(url: data.url) {
+                            if let info = await fetchPokemon(info: data) {
                                 infos.append(info)
                             }
                         }

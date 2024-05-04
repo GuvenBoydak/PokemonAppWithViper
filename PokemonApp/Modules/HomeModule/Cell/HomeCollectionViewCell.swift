@@ -58,7 +58,7 @@ extension HomeCollectionViewCell {
         }
     }
     func configure(info: Info) {
-        guard let url = URL(string: info.url) else {
+        guard let url = URL(string: info.imageUrl ?? "") else {
             return
         }
         URLSession.shared.dataTask(with: url ) { (data, response, error) in

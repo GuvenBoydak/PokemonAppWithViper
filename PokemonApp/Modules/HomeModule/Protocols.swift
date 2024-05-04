@@ -24,11 +24,13 @@ protocol HomePresenterProtocol {
     var view: HomeViewProtocol? { get set }
     var viewOutput: HomeViewOutput? { get set }
     var interactor: HomeInteractorProtocol? { get set }
+    var router: HomeRouterProtocol? { get set }
     var shouldShowLoadMoreIndicator: Bool { get set }
     var isLoadingMorePokemon: Bool { get set }
     
     func fetchPokemons() 
     func fetchAdditionalPokemons(url: String)
+    func didSelectPokemon(url: String)
 }
 
 // MARK: - Interactor
@@ -48,4 +50,5 @@ protocol HomeInteractorOutput {
 // MARK: - Router
 protocol HomeRouterProtocol {
    static func build() -> HomeViewController
+   func pushToDetailPokemon(url: String)
 }

@@ -11,6 +11,7 @@ final class HomePresenter: HomePresenterProtocol {
     var view: HomeViewProtocol?
     var viewOutput: HomeViewOutput?
     var interactor: HomeInteractorProtocol?
+    var router: HomeRouterProtocol?
     var shouldShowLoadMoreIndicator: Bool = false
     var isLoadingMorePokemon: Bool = false
     
@@ -23,7 +24,10 @@ final class HomePresenter: HomePresenterProtocol {
         isLoadingMorePokemon = true
         
         interactor?.fetchAdditionalPokemons(url: url)
-
+    }
+    
+    func didSelectPokemon(url: String) {
+        router?.pushToDetailPokemon(url: url)
     }
 }
 // MARK: - HomeInteractorOutput

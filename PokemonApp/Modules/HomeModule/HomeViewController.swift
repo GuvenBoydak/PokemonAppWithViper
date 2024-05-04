@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class HomeViewController: UIViewController {
+final class HomeViewController: UIViewController,Viewable {
     // MARK: - UIElements
     private var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -109,6 +109,11 @@ extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSourc
         cell.layer.cornerRadius = 10
         return cell
     }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if let info = pokemonResult?.results[indexPath.row] {
+            presenter?.didSelectPokemon(url: info.url)
+        }
+    }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let widths = (collectionView.frame.width - 20) / 2
         return .init(width: widths, height: widths * 1.2)
@@ -121,7 +126,8 @@ extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSourc
             return .zero
         }
         return .init(width: collectionView.frame.width, height: 100)
-    }}
+    }
+}
 
 // MARK: - UIScrollViewDelegate
 extension HomeViewController: UIScrollViewDelegate {

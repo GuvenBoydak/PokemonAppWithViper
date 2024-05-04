@@ -6,3 +6,12 @@
 //
 
 import Foundation
+
+struct NetworkConfig {
+    var baseURL = "https://pokeapi.co/api/v2/pokemon"
+}
+
+enum NetworkError: Error {
+    case UrlError
+    case DecoderError
+}

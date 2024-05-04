@@ -17,4 +17,5 @@ struct PokemonResult: Codable {
 struct Info: Codable {
     let name: String
     let url: String
+    var imageUrl: String?
 }
